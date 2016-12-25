@@ -19,7 +19,10 @@ namespace Dijkstra
 		Node() : value(NULL) {}
 		Node(T value) : value(value) {}
 		
-		inline bool operator==(const Node<T>& other){ return (other.value == this->value); }
+		inline bool operator ==(const Node<T>& other){ return (other.value == this->value); }
+		inline bool operator !=(const Node<T>& other){ return !(other.value == this->value); }
+		inline bool operator >(const Node<T>& other){ return (other.value > this->value); }
+		inline bool operator <(const Node<T>& other){ return (other.value < this->value); }
 
 		/**
 		 * Sets the value of this node

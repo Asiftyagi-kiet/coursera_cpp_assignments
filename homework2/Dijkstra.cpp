@@ -1,4 +1,6 @@
 #include "Graph.h"
+#include "PriorityQueue.h"
+
 
 using namespace Dijkstra;
 
@@ -38,10 +40,20 @@ int main(int argc, char** argv)
 	std::cout << g << std::endl;
 
 	Graph randomG(10);
-
 	randomG.generateRandomGraph(0.1, 1, 10);
-
 	std::cout << randomG << std::endl;
+
+	PriorityQueue<Node<int>* > pq;
+
+	pq.push(new Node<int>(1), 5.1);
+	pq.push(new Node<int>(2), 4.1);
+	pq.push(new Node<int>(3), 3.1);
+	pq.push(new Node<int>(4), 2.1);
+	pq.push(new Node<int>(5), 1.1);
+	pq.push(new Node<int>(6), 6.1);
+
+	std::cout << pq << std::endl;
+	std::cout << *(pq.top()) << std::endl;
 
 	return 0;
 }
