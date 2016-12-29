@@ -192,6 +192,8 @@ namespace Dijkstra
 		 */
 		void generateRandomGraph(double density, double minDistance, double maxDistance);
 
+		std::vector< std::list<Edge<int>* > >& getAdjacencyList() { return this->adjacencyList; }
+
 		/**
 		 *	Prints out the graph structure
 		 */

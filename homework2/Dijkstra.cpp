@@ -1,6 +1,7 @@
 #include "Graph.h"
 #include "PriorityQueue.h"
-
+#include "ShortestPathAlgo.h"
+#include <string>
 
 using namespace Dijkstra;
 
@@ -43,17 +44,42 @@ int main(int argc, char** argv)
 	randomG.generateRandomGraph(0.1, 1, 10);
 	std::cout << randomG << std::endl;
 
-	PriorityQueue<Node<int>* > pq;
-
-	pq.push(new Node<int>(1), 5.1);
-	pq.push(new Node<int>(2), 4.1);
-	pq.push(new Node<int>(3), 3.1);
-	pq.push(new Node<int>(4), 2.1);
-	pq.push(new Node<int>(5), 1.1);
-	pq.push(new Node<int>(6), 6.1);
+	PriorityQueue<int> pq(6);
+	pq.push(6, 6.2);
+	pq.push(2, 1.5);
+	pq.push(3, 2.1);
+	pq.push(1, 3.1);
+	pq.push(4, 4.1);
+	pq.push(5, 5.1);
 
 	std::cout << pq << std::endl;
-	std::cout << *(pq.top()) << std::endl;
+	std::cout << pq.top() << " contains 9: " << (pq.contains(9) == true ? "TRUE" : "FALSE") << std::endl;
+
+	std::cout << std::endl;
+	std::cout << "Dijkstra shortest path algorithm demo" << std::endl;
+	std::cout << "-------------------------------------" << std::endl << std::endl;
+
+	Graph graph(5);
+	graph.addEdge(1,2,6);
+	graph.addEdge(1,4,1);
+	graph.addEdge(2,3,5);
+	graph.addEdge(2,4,2);
+	graph.addEdge(2,5,2);
+	graph.addEdge(3,2,5);
+	graph.addEdge(3,5,5);
+	graph.addEdge(4,1,1);
+	graph.addEdge(4,2,2);
+	graph.addEdge(4,5,1);
+	graph.addEdge(5,2,2);
+	graph.addEdge(5,3,5);
+	graph.addEdge(5,4,1);
+
+	std::cout << graph << std::endl;
+
+	ShortestPathAlgo shortestPath(graph);
+	shortestPath.path(1, 3);
+
+	std::cout << "path cost from 1 to 3: " << shortestPath.pathSize(1, 3) << std::endl;
 
 	return 0;
 }

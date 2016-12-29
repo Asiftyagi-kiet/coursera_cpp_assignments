@@ -12,6 +12,7 @@
 #include <vector>
 #include <algorithm>
 #include <sstream>
+#include <cassert>
 
 namespace Dijkstra
 {
@@ -31,32 +32,39 @@ namespace Dijkstra
 		/**
 		 * Initializes a new empty priority queue
 		 */
-		PriorityQueue() : heap(std::vector<HeapEntry<T>* >()) {}
+		PriorityQueue(int maxCapacity) : heap(std::vector<HeapEntry>(maxCapacity+1)), currentSize(0) {}
 
 		~PriorityQueue() {
-			for (unsigned int i = 0; i < heap.size(); i++) {
-				delete heap[i];
-			}
 			this->clear();
 		}
 
 		/**
-		 * Adds element to the queue with the specified priority.
+		 * Adds element to the queue with the specified priority in O(log N) time
 		 * @param element the element to be added
 		 * @param priority its priority
 		 */
 		void push(T element, double priority) {
-			heap.push_back(new HeapEntry<T>(element, priority));
-			std::push_heap(heap.begin(), heap.end(), GreaterThanComparator<HeapEntry<T>* >());
+			// double size of array if necessary
+			int length = heap.size();
+			if (currentSize == length - 1)
+				heap.resize(2 * length);
+
+			// add element, and percolate it up to maintain heap invariant
+			int hole = ++currentSize;
+
+			heap[hole].value = element;
+			heap[hole].priority = priority;
+			percolateUp(hole);
 		}
 
 		/**
-		 * Removes and returns the highest priority value
-		 * @return he highest priority value
+		 * Removes the item with the highest priority value
+		 * @note time complexity is O(log N) time
 		 */
 		void pop() {
-			std::pop_heap(heap.begin(), heap.end(), GreaterThanComparator<HeapEntry<T>* >());
-			heap.pop_back();
+			assert (currentSize > 0);
+			heap[1] = heap[currentSize--];
+			percolateDown(1);
 		}
 
 		/**
@@ -66,13 +74,16 @@ namespace Dijkstra
 		 * @param priority	the new priority
 		 */
 		void changePriority(T element, double priority) {
-
+			heap[currentSize].value = element;
+			heap[currentSize].priority = priority;
+			percolateUp(currentSize);
 		}
 
 		/**
 		 * removes the top element of the queue.
+		 * @see <code>pop</code>
 		 */
-		void minPrioirty();
+		void minPrioirty() { pop(); }
 
 		/**
 		 * Checks if queue contains element
@@ -80,14 +91,21 @@ namespace Dijkstra
 		 * @param element the element to be checked upon
 		 * @return <code>true</code> if it does and <code>false</code> otherwise
 		 */
-		bool contains(T element);
+		bool contains(T element) {
+			for (int i = 0; i < currentSize; i++) {
+				if (heap[i].value == element) {
+					return true;
+				}
+			}
+			return false;
+		}
 
 		/**
 		 * Returns the top element of the queue.
 		 * @return the top element of the queue
 		 */
 		T& top() {
-			return heap[0]->value;
+			return heap[1].value;
 		}
 
 		/**
@@ -95,7 +113,7 @@ namespace Dijkstra
 		 * @return the number of queue elements
 		 */
 		int size() {
-			return heap.size();
+			return currentSize;
 		}
 
 		/**
@@ -111,7 +129,7 @@ namespace Dijkstra
 		 *         and <code>false</code> otherwise
 		 */
 		bool isEmpty() const {
-			return heap.empty();
+			return (currentSize == 0);
 		}
 
 		/**
@@ -119,39 +137,51 @@ namespace Dijkstra
 		 */
 		friend std::ostream& operator<<(std::ostream& os, const PriorityQueue<T>& pq) {
 			std::stringstream ss;
-			typename std::vector<HeapEntry<T>* >::const_iterator itr = pq.heap.begin();
-			while (itr!= pq.heap.end()) {
-				ss << *((*itr)->value) << "(" << (*itr)->priority << ")" << std::endl;
-				++itr;
+
+			for (int i = 1; i < pq.currentSize+1; i++) {
+				ss << pq.heap[i].value << "(" << pq.heap[i].priority << ")" << std::endl;
 			}
 			return (os << ss.str());
 		}
 
 	private:
 
-		/**
-		 * HeapEntry type used for each queue element
-		 */
-		template <typename E>
-	    class HeapEntry
-		{
-	    public:
-	    	HeapEntry() : value(NULL), priority(0.0) {}
-	    	HeapEntry(T value, double priority) : value(value), priority(priority) {}
-	    	E value;
-	    	double priority;
-	    };
+		void swap(int i, int j) {
+			HeapEntry temp = heap[i];
+			heap[i] = heap[j];
+			heap[j] = temp;
+		}
 
-		template <typename O>
-	    class GreaterThanComparator
-		{
-	    public:
-			inline bool operator()(const O& entry1, const O& entry2) {
-				return (entry1->priority > entry2->priority);
+		bool greater(int i, int j) {
+            return (heap[i].priority > heap[j].priority);
+		}
+
+		void percolateUp(int k) {
+			while (k > 1 && greater(k / 2, k)) {
+				swap(k, k / 2);
+				k = k / 2;
 			}
-	    };
+		}
 
-		std::vector<HeapEntry<T>* > heap;
+		void percolateDown(int k) {
+			while (2 * k <= currentSize) {
+				int j = 2 * k;
+				if (j < currentSize && greater(j, j + 1))
+					j++;
+				if (!greater(k, j))
+					break;
+				swap(k, j);
+				k = j;
+			}
+		}
+
+		struct HeapEntry {
+			T value;
+			double priority;
+		};
+
+		std::vector<HeapEntry> heap;
+		int currentSize;
 	};
 }
 
