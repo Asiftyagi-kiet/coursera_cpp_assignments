@@ -11,10 +11,11 @@
 
 #include "Graph.h"
 #include "PriorityQueue.h"
+#include <set>
 
 namespace Dijkstra
 {
-	static const int INFINITY = 999;
+	static const double INFINITY = 9999;
 
 	/**
 	 * This class implements the mechanics of Dijkstra’s algorithm
@@ -38,15 +39,15 @@ namespace Dijkstra
 
 		/**
 		 *
-		 * Finds the shortest paths from src(u) to all other vertices
+		 * Finds the shortest paths from src to all other vertices
 		 *
-		 * find shortest path between src(u)-dest(w)
+		 * find shortest path between src-dest (i.e u-w)
 		 * @param src	The source vertex
 		 * @param dest 	The destination vertex
 		 *
 		 * @return The sequence of vertices representing shortest path u-v1-v2-…-vn-w.
 		 */
-		listOfVertices path(int src, int dest);
+		const listOfVertices path(int src, int dest);
 
 		/**
 		 * Returns the path cost associated with the shortest path.
@@ -55,6 +56,11 @@ namespace Dijkstra
 		 * @return the path cost
 		 */
 		double pathSize(int x, int y);
+
+		/**
+		 * Prints the shortest path u-v1-v2-…-vn-w.
+		 */
+		void printShortestPath(int u, int w);
 
 	private:
 
@@ -67,6 +73,7 @@ namespace Dijkstra
 		std::vector<double> distTo;        	// distTo[v] = distance  of shortest u->w path
 		std::vector<Edge<int>* > edgeTo;   	// edgeTo[v] = last edge on shortest u->w path
 		PriorityQueue<double> pq;			// priority queue of vertices
+		listOfVertices shortestPath;		// the sequence of vertices representing shortest path u-v1-v2-…-vn-w.
 	};
 }
 

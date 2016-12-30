@@ -7,19 +7,20 @@
  */
 
 #include "ShortestPathAlgo.h"
-#include "IndexMinPQ.h"
 
 #include <vector>
 #include <iostream>
-#include <queue>
+#include <iomanip>
+#include <algorithm>
 
 namespace Dijkstra
 {
 	ShortestPathAlgo::ShortestPathAlgo(Graph &graph) :
 			graph(graph),
-			distTo(std::vector<double>(graph.getV()+1, INF)),
+			distTo(std::vector<double>(graph.getV()+1, INFINITY)),
 			edgeTo(std::vector<Edge<int>* >(graph.getV()+1)),
-			pq(graph.getV()+1)
+			pq(graph.getV()+1),
+			shortestPath(std::vector<Node<int>*>())
 	{
 	}
 
@@ -37,9 +38,8 @@ namespace Dijkstra
 		return v;
 	}
 
-	ShortestPathAlgo::listOfVertices ShortestPathAlgo::path(int src, int dest) {
+	const ShortestPathAlgo::listOfVertices ShortestPathAlgo::path(int src, int dest) {
 
-		listOfVertices shortestPath;
 		std::vector< std::list<Edge<int>* > > adj = graph.getAdjacencyList();
 
 		validateVertex(src);
@@ -51,6 +51,8 @@ namespace Dijkstra
 
 			int u = pq.top();
 			pq.pop();
+
+			int previous = 0;
 
 			Graph::listOfEdgesConstItr itr = adj[u].begin(); // neighbors
 			while (itr != adj[u].end()) {
@@ -65,6 +67,11 @@ namespace Dijkstra
 					pq.push(y, distTo[y]);
 					edgeTo[y] = (*itr);
 
+					if (u != previous) { // workaround to store unique nodes in seq
+						previous = u;
+						shortestPath.push_back((*itr)->getX());
+					}
+
 					if (pq.contains(y)) {
 						pq.changePriority(y, distTo[y]);
 					} else {
@@ -74,14 +81,7 @@ namespace Dijkstra
 				++itr;
 			}
 		}
-
-		// Print shortest distances stored in distTo
-		std::cout << "Vertex   Distance from Source" << std::endl;
-		for (unsigned int i = 0; i < distTo.size(); ++i) {
-			std::cout << i << "\t\t" << distTo[i] << std::endl;
-		}
-
-		std::cout << "--------------------------------" << std::endl;
+		return shortestPath;
 	}
 
 	double ShortestPathAlgo::pathSize(int x, int y) {
@@ -89,11 +89,40 @@ namespace Dijkstra
 		validateVertex(y);
 
 		double path_size = 0;
-		for (int i = 0; i < distTo.size(); ++i) {
+		for (int i = 0; i < (int) distTo.size(); ++i) {
 			if (i >= x && i <= y)
 				path_size += distTo[i];
 		}
 		return path_size;
+	}
+
+	void ShortestPathAlgo::printShortestPath(int u, int w) {
+		validateVertex(u);
+		validateVertex(w);
+
+		std::stringstream ss;
+		ss << std::setprecision(2);
+
+		const std::vector<Node<int>*>  sp = path(u, w);
+
+		// Print shortest distances stored in distTo
+		ss << "Vertex   Distance from Source" << std::endl;
+		for (unsigned int i = 0; i < distTo.size(); ++i) {
+			ss << i << "\t\t" << distTo[i] << std::endl;
+		}
+
+		ss << "--------------------" << std::endl;
+
+		ss << "path cost from " << u << " to " << w << ": " << pathSize(1, 3) << std::endl;
+
+		ss << "shortest path sequence from " << u << " to " << w << ": ";
+		std::vector<Node<int>*>::const_iterator it;
+		for (it = sp.begin(); it != sp.end(); ++it) {
+			ss << (*it)->getValue() << "->";
+		}
+		ss << w << std::endl;
+
+		std::cout << ss.str();
 	}
 }
 

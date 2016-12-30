@@ -192,6 +192,10 @@ namespace Dijkstra
 		 */
 		void generateRandomGraph(double density, double minDistance, double maxDistance);
 
+		/**
+		 * Returns a reference to the internal adjacency list
+		 * @return a reference to the internal adjacency list
+		 */
 		std::vector< std::list<Edge<int>* > >& getAdjacencyList() { return this->adjacencyList; }
 
 		/**
