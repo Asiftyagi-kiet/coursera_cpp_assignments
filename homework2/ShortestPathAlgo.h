@@ -11,12 +11,10 @@
 
 #include "Graph.h"
 #include "PriorityQueue.h"
-#include <set>
+#include <algorithm>
 
 namespace Dijkstra
 {
-	static const double INFINITY = 9999;
-
 	/**
 	 * This class implements the mechanics of Dijkstra’s algorithm
 	 *
@@ -51,6 +49,7 @@ namespace Dijkstra
 
 		/**
 		 * Returns the path cost associated with the shortest path.
+		 *
 		 * @param x Node
 		 * @param y Node
 		 * @return the path cost
@@ -64,16 +63,33 @@ namespace Dijkstra
 
 	private:
 
-		void validateVertex(int v) {
-			int V = distTo.size();
-			assert (v > 0 || v <= V);  // vertex | 0 | (V-1)
-		}
+		/**
+		 * Validate vertex and abort unless {@code 0 <= v < V}
+		 */
+		void validateVertex(int v);
+
+		/**
+		 * Returns true if there is a path from the source vertex {@code s} to vertex {@code v}.
+		 *
+		 * @param  v the destination vertex
+		 * @return {@code true} if there is a path from the source vertex
+		 *         {@code s} to vertex {@code v}; {@code false} otherwise
+		 */
+		bool hasPathTo(int v);
+
+		/**
+		 * Returns a shortest path from the source vertex {@code s} to vertex {@code v}.
+		 *
+		 * @param  v the destination vertex
+		 * @return a shortest path from the source vertex {@code s} to vertex {@code v}
+		 *         as an vector of edges, and {@code NULL} if no such path
+		 */
+		std::vector<Edge<int>*> pathTo(int v);
 
 		Graph &graph;
 		std::vector<double> distTo;        	// distTo[v] = distance  of shortest u->w path
 		std::vector<Edge<int>* > edgeTo;   	// edgeTo[v] = last edge on shortest u->w path
 		PriorityQueue<double> pq;			// priority queue of vertices
-		listOfVertices shortestPath;		// the sequence of vertices representing shortest path u-v1-v2-…-vn-w.
 	};
 }
 

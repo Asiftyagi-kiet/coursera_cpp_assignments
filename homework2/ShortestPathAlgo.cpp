@@ -10,24 +10,23 @@
 
 #include <vector>
 #include <iostream>
-#include <iomanip>
 #include <algorithm>
+#include <iomanip>
 
 namespace Dijkstra
 {
 	ShortestPathAlgo::ShortestPathAlgo(Graph &graph) :
 			graph(graph),
-			distTo(std::vector<double>(graph.getV()+1, INFINITY)),
-			edgeTo(std::vector<Edge<int>* >(graph.getV()+1)),
-			pq(graph.getV()+1),
-			shortestPath(std::vector<Node<int>*>())
+			distTo(std::vector<double>(graph.getV(), std::numeric_limits<double>::max())),
+			edgeTo(std::vector<Edge<int>* >(graph.getV())),
+			pq(graph.getV())
 	{
 	}
 
 	const ShortestPathAlgo::listOfVertices ShortestPathAlgo::vertices() const {
 		listOfVertices v(graph.getV());
 
-		for (unsigned int i = 1; i < graph.getAdjacencyList().size(); ++i) {
+		for (unsigned int i = 0; i < graph.getAdjacencyList().size(); ++i) {
 			Graph::listOfEdgesConstItr it = graph.getAdjacencyList()[i].begin();
 
 			while (it != graph.getAdjacencyList()[i].end()) {
@@ -36,6 +35,11 @@ namespace Dijkstra
 			}
 		}
 		return v;
+	}
+
+	bool ShortestPathAlgo::hasPathTo(int v) {
+		validateVertex(v);
+		return distTo[v] < std::numeric_limits<double>::max();
 	}
 
 	const ShortestPathAlgo::listOfVertices ShortestPathAlgo::path(int src, int dest) {
@@ -52,8 +56,6 @@ namespace Dijkstra
 			int u = pq.top();
 			pq.pop();
 
-			int previous = 0;
-
 			Graph::listOfEdgesConstItr itr = adj[u].begin(); // neighbors
 			while (itr != adj[u].end()) {
 
@@ -67,11 +69,6 @@ namespace Dijkstra
 					pq.push(y, distTo[y]);
 					edgeTo[y] = (*itr);
 
-					if (u != previous) { // workaround to store unique nodes in seq
-						previous = u;
-						shortestPath.push_back((*itr)->getX());
-					}
-
 					if (pq.contains(y)) {
 						pq.changePriority(y, distTo[y]);
 					} else {
@@ -81,6 +78,14 @@ namespace Dijkstra
 				++itr;
 			}
 		}
+
+		listOfVertices shortestPath; // the sequence of vertices representing shortest path u-v1-v2-…-vn-w
+		if (hasPathTo(dest)) {
+			for (Edge<int>* e : pathTo(dest)) {
+				shortestPath.push_back(e->getX());
+			}
+		}
+
 		return shortestPath;
 	}
 
@@ -88,12 +93,7 @@ namespace Dijkstra
 		validateVertex(x);
 		validateVertex(y);
 
-		double path_size = 0;
-		for (int i = 0; i < (int) distTo.size(); ++i) {
-			if (i >= x && i <= y)
-				path_size += distTo[i];
-		}
-		return path_size;
+		return distTo[y];
 	}
 
 	void ShortestPathAlgo::printShortestPath(int u, int w) {
@@ -103,26 +103,54 @@ namespace Dijkstra
 		std::stringstream ss;
 		ss << std::setprecision(2);
 
-		const std::vector<Node<int>*>  sp = path(u, w);
+		const listOfVertices sp = path(u, w);
 
-		// Print shortest distances stored in distTo
-		ss << "Vertex   Distance from Source" << std::endl;
-		for (unsigned int i = 0; i < distTo.size(); ++i) {
-			ss << i << "\t\t" << distTo[i] << std::endl;
+		// Print shortest path
+		ss << "Vertex   Distance from Source   Shortest Path" << std::endl;
+		for (int t = u; t <= w; t++) {
+			if (hasPathTo(t)) {
+				ss << t << "\t\t" << distTo[t] << "\t\t";
+
+				for (Edge<int>* e : pathTo(t)) {
+					ss << e->getX()->getValue() << "->";
+				}
+				ss << t << std::endl;
+			} else {
+				ss << u << "\t\t" << t << "\t\tno path" << std::endl;
+			}
 		}
 
-		ss << "--------------------" << std::endl;
+		ss << std::endl;
 
-		ss << "path cost from " << u << " to " << w << ": " << pathSize(1, 3) << std::endl;
-
+		ss << "path cost from " << u << " to " << w << ": " << pathSize(u, w) << std::endl;
 		ss << "shortest path sequence from " << u << " to " << w << ": ";
-		std::vector<Node<int>*>::const_iterator it;
-		for (it = sp.begin(); it != sp.end(); ++it) {
-			ss << (*it)->getValue() << "->";
-		}
-		ss << w << std::endl;
+		for (unsigned int v = 0; v < sp.size(); ++v)
+			ss << sp[v]->getValue() << "->";
+		ss << w << std::endl;;
 
 		std::cout << ss.str();
+	}
+
+	void ShortestPathAlgo::validateVertex(int v) {
+		int V = distTo.size();
+		assert(v > 0 || v <= V);  // vertex | 0 | (V-1)
+	}
+
+	std::vector<Edge<int>*> ShortestPathAlgo::pathTo(int v) {
+		validateVertex(v);
+
+		if (!hasPathTo(v))
+			return std::vector<Edge<int>*>();
+
+		std::vector<Edge<int>*> path;
+
+		for (auto e = edgeTo[v]; e != NULL; e = edgeTo[e->getX()->getValue()]) {
+			path.push_back(e);
+		}
+
+		std::reverse(path.begin(), path.end());
+
+		return path;
 	}
 }
 

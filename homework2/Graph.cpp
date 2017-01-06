@@ -18,7 +18,7 @@
 namespace Dijkstra
 {
 	Graph::Graph(int V) :
-			V(V), E(0), adjacencyList(std::vector<listOfEdges>(V+1)) {
+			V(V), E(0), adjacencyList(std::vector<listOfEdges>(V)) {
 
 		assert(V >= 0); // Number of vertices must be positive
 	}
@@ -39,7 +39,7 @@ namespace Dijkstra
 		g->V = this->V;
 		g->E = this->E;
 
-		for (unsigned int i = 1; i < this->adjacencyList.size(); ++i) {
+		for (unsigned int i = 0; i < this->adjacencyList.size(); ++i) {
 			std::copy(this->adjacencyList[i].begin(), this->adjacencyList[i].end(),
 					g->adjacencyList[i].begin());
 		}
@@ -57,7 +57,7 @@ namespace Dijkstra
 			this->V = other.V;
 			this->E = other.E;
 
-			for (unsigned int i = 1; i < other.adjacencyList.size(); ++i) {
+			for (unsigned int i = 0; i < other.adjacencyList.size(); ++i) {
 				std::copy(other.adjacencyList[i].begin(), other.adjacencyList[i].end(), this->adjacencyList[i].begin());
 			}
 		}
@@ -73,7 +73,7 @@ namespace Dijkstra
 			return false;
 		}
 
-		for (unsigned int i = 1; i < this->adjacencyList.size(); ++i) {
+		for (unsigned int i = 0; i < this->adjacencyList.size(); ++i) {
 
 			listOfEdgesConstItr thisItr = this->adjacencyList[i].begin();
 			listOfEdgesConstItr otherItr = other.adjacencyList[i].begin();
@@ -198,7 +198,7 @@ namespace Dijkstra
 		ss << "Graph (" << graph.getV() << "," << graph.getE() << ")" << std::endl;
 		ss << "The Adjacency List K(" << graph.getV() << ")" << std::endl;
 
-		for (unsigned int i = 1; i < graph.adjacencyList.size(); ++i) {
+		for (unsigned int i = 0; i < graph.adjacencyList.size(); ++i) {
 			ss << "Adjacency List[" << i << "] ";
 
 			Graph::listOfEdgesConstItr itr = graph.adjacencyList[i].begin();
@@ -225,12 +225,10 @@ namespace Dijkstra
 
 		srand(time(NULL));
 
-		int edgeCount = EDGE_LIMIT;
-
-		while (edgeCount > 0) {
+		while (this->getE() < EDGE_LIMIT) {
 			// pick two random nodes
-			int x = rand() % V + 1;
-			int y = rand() % V + 1;
+			int x = rand() % V;// + 1;
+			int y = rand() % V;// + 1;
 
 			// check for an edge between x and y, no loops
 			if (x == y || this->isAdjacent(x, y)) {
@@ -241,7 +239,6 @@ namespace Dijkstra
 			double f = (double)rand() / RAND_MAX;
 			double w = minDistance + f * (maxDistance - minDistance);
 			this->addEdge(x, y, w);
-			edgeCount--;
 		}
 	}
 }

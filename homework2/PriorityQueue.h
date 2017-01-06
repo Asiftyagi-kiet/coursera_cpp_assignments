@@ -32,7 +32,7 @@ namespace Dijkstra
 		/**
 		 * Initializes a new empty priority queue
 		 */
-		PriorityQueue(int maxCapacity) : heap(std::vector<HeapEntry>(maxCapacity+1)), currentSize(0) {}
+		PriorityQueue(int maxCapacity) : heap(std::vector<HeapEntry>(maxCapacity)), currentSize(0) {}
 
 		~PriorityQueue() {
 			this->clear();
@@ -138,7 +138,7 @@ namespace Dijkstra
 		friend std::ostream& operator<<(std::ostream& os, const PriorityQueue<T>& pq) {
 			std::stringstream ss;
 
-			for (int i = 1; i < pq.currentSize+1; i++) {
+			for (int i = 0; i < pq.currentSize+1; i++) {
 				ss << pq.heap[i].value << "(" << pq.heap[i].priority << ")" << std::endl;
 			}
 			return (os << ss.str());
