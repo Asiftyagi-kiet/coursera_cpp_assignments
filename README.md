@@ -16,3 +16,7 @@ Graph::generateRandomGraph funtion uses Monte Carlo metod
 (https://en.wikipedia.org/wiki/Monte_Carlo_method) in order to produce random
 data for the Graph.
 
+## Homework 3: Compute the minimum spanning tree for an inputted graph
+It is an implementation of a minimum spanning tree (MST) Prim's algorithm for a
+weighted undirected graph.
+

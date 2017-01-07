@@ -1,0 +1,10 @@
+homework3/bin
+homework3/*.vpj
+homework3/*.vpw
+homework3/*.vtg
+homework3/*.vpwhistu
+homework3/build
+homework3/Debug
+homework3/.project
+homework3/.settings
+homework3/.cproject
